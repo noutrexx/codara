@@ -3,6 +3,7 @@ using Codara.Domain;
 using Codara.Infrastructure;
 using Codara.Presentation.DesignSystem;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Codara.Presentation
 {
@@ -29,11 +30,20 @@ namespace Codara.Presentation
             var loader = new UnitySceneLoader();
             var saveService = new FileLocalSaveService();
             var connectionMonitor = gameObject.AddComponent<InternetConnectionMonitorBehaviour>();
+            var onboardingRepository = new LocalOnboardingRepository(saveService);
+            var authenticationService = new AuthenticationService(new List<IAuthenticationProvider>
+            {
+                new GuestAuthenticationProvider()
+            });
 
             registry.Register(new ApplicationState());
             registry.Register<ILocalSaveService>(saveService);
             registry.Register<IInternetConnectionMonitor>(connectionMonitor);
             registry.Register<IOfflineOperationQueue>(new PersistentOfflineOperationQueue(saveService));
+            registry.Register<IOnboardingRepository>(onboardingRepository);
+            registry.Register(authenticationService);
+            registry.Register<IAuthenticationService>(authenticationService);
+            registry.Register(new OnboardingService(onboardingRepository));
             registry.Register<IErrorHandler>(errors);
             registry.Register<ILoadingScreen>(loadingScreen);
             registry.Register<IModalService>(globalModal);
