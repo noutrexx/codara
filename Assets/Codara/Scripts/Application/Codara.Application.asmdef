@@ -1,0 +1,9 @@
+{
+  "name": "Codara.Application",
+  "rootNamespace": "Codara.Application",
+  "references": [
+    "Codara.Domain"
+  ],
+  "autoReferenced": true
+}
+

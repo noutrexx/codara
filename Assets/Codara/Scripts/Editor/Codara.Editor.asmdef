@@ -1,0 +1,15 @@
+{
+  "name": "Codara.Editor",
+  "rootNamespace": "Codara.Editor",
+  "references": [
+    "Codara.Domain",
+    "Codara.Application",
+    "Codara.Infrastructure",
+    "Codara.Presentation",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false
+}

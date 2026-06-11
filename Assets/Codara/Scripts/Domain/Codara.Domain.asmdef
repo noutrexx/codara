@@ -1,0 +1,6 @@
+{
+  "name": "Codara.Domain",
+  "rootNamespace": "Codara.Domain",
+  "noEngineReferences": true,
+  "autoReferenced": true
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Codara.Presentation",
+  "rootNamespace": "Codara.Presentation",
+  "references": [
+    "Codara.Domain",
+    "Codara.Application",
+    "Codara.Infrastructure",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ],
+  "autoReferenced": true
+}
