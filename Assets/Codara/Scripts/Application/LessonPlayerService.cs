@@ -14,11 +14,18 @@ namespace Codara.Application
     {
         private readonly ExerciseEvaluationEngine engine;
         private readonly ILessonSessionRepository repository;
+        private readonly MistakeRecorder mistakeRecorder;
+        private readonly Func<DateTimeOffset> clock;
+        private readonly string userId;
 
-        public LessonPlayerService(ExerciseEvaluationEngine engine, ILessonSessionRepository repository)
+        public LessonPlayerService(ExerciseEvaluationEngine engine, ILessonSessionRepository repository,
+            MistakeRecorder mistakeRecorder = null, string userId = "", Func<DateTimeOffset> clock = null)
         {
             this.engine = engine ?? throw new ArgumentNullException(nameof(engine));
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            this.mistakeRecorder = mistakeRecorder;
+            this.userId = userId ?? string.Empty;
+            this.clock = clock ?? (() => DateTimeOffset.UtcNow);
         }
 
         public LessonSession StartOrResume(string sessionId, string lessonId, int exerciseCount)
@@ -36,13 +43,15 @@ namespace Codara.Application
             try
             {
                 var result = engine.Evaluate(attemptId, exercise, answer);
+                if (!result.IsCorrect && mistakeRecorder != null)
+                    mistakeRecorder.Record(attemptId + ":mistake", userId, exercise, answer, result, clock());
                 session.RecordEvaluation(result);
                 repository.Save(session);
                 return result;
             }
             catch
             {
-                session.CancelEvaluation();
+                if (session.State == LessonSessionState.Evaluating) session.CancelEvaluation();
                 repository.Save(session);
                 throw;
             }

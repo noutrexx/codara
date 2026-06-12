@@ -43,6 +43,21 @@ namespace Codara.Tests.EditMode
             Assert.That(session.InputLocked, Is.False);
         }
 
+        [Test]
+        public void Submit_WrongAnswerRecordsMistake()
+        {
+            var mistakeRepository = new MemoryMistakeRepository();
+            var player = new LessonPlayerService(new ExerciseEvaluationEngine(), new LocalLessonSessionRepository(new MemorySaveService()),
+                new MistakeRecorder(mistakeRepository), "user");
+            var session = player.StartOrResume("session", "lesson", 1);
+            var exercise = new ExerciseDefinition("e1", ExerciseType.ShortAnswer, "", "", ExerciseAnswer.From("right"),
+                skillTags: new[] { "loops" }, errorCategories: new[] { "LoopLogic" });
+
+            player.Submit(session, "a1", exercise, ExerciseAnswer.From("wrong"));
+
+            Assert.That(mistakeRepository.Load().Count, Is.EqualTo(1));
+        }
+
         private sealed class MemorySaveService : ILocalSaveService
         {
             private readonly Dictionary<string, string> data = new();
@@ -50,6 +65,13 @@ namespace Codara.Tests.EditMode
             public string Load(string key) => data.TryGetValue(key, out var value) ? value : null;
             public void Save(string key, string content) => data[key] = content;
             public void Delete(string key) => data.Remove(key);
+        }
+
+        private sealed class MemoryMistakeRepository : IMistakeRepository
+        {
+            private IReadOnlyList<MistakeRecord> records = System.Array.Empty<MistakeRecord>();
+            public IReadOnlyList<MistakeRecord> Load() => records;
+            public void Save(IReadOnlyList<MistakeRecord> mistakes) => records = mistakes;
         }
     }
 }
