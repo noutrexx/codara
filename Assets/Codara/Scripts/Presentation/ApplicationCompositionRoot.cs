@@ -31,6 +31,8 @@ namespace Codara.Presentation
             var saveService = new FileLocalSaveService();
             var connectionMonitor = gameObject.AddComponent<InternetConnectionMonitorBehaviour>();
             var onboardingRepository = new LocalOnboardingRepository(saveService);
+            var lessonSessionRepository = new LocalLessonSessionRepository(saveService);
+            var evaluationEngine = new ExerciseEvaluationEngine();
             var authenticationService = new AuthenticationService(new List<IAuthenticationProvider>
             {
                 new GuestAuthenticationProvider()
@@ -41,6 +43,9 @@ namespace Codara.Presentation
             registry.Register<IInternetConnectionMonitor>(connectionMonitor);
             registry.Register<IOfflineOperationQueue>(new PersistentOfflineOperationQueue(saveService));
             registry.Register<IOnboardingRepository>(onboardingRepository);
+            registry.Register<ILessonSessionRepository>(lessonSessionRepository);
+            registry.Register(evaluationEngine);
+            registry.Register(new LessonPlayerService(evaluationEngine, lessonSessionRepository));
             registry.Register(authenticationService);
             registry.Register<IAuthenticationService>(authenticationService);
             registry.Register(new OnboardingService(onboardingRepository));
